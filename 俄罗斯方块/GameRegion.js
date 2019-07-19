@@ -177,20 +177,24 @@ function full_and_clear(high_y,low_y){    //行满消除
     var mark=true;
     for(i=high_y;i>=low_y;i--){
         for(j=0;j<30;j++){
-            if(net[i][j]==0){
+            if(net[j][i]==0){
                 mark=false;
+                break;
             }
         }
         if(mark==true){
-            for(j=0;j<30;j++){
-                net[j][i]=net[j][i-1]; //消行
+            for(k=i;k>0;k--){
+                for(j=0;j<30;j++){
+                    net[j][k]=net[j][k-1]; //消行
+                }
+                score+=50;
             }
-            score+=50;
             if(score%2000==0){   //分数满2000升级
                 level++;
                 // rate++;
             }
         }
+        mark = true;
     }
 }
 
@@ -225,16 +229,10 @@ function block_move(block,color,dy){   //图形移动
     else{    //有方块则对棋盘进行写入
         for(i=0;i<4;i++){
             net[block[i][0]][block[i][1]] = color;
-            // if(dy==5)
-            // {
-            //     net[block[i][0]][block[i][1]+dy] = color
-            // }
-            // else{
-            //     net[block[i][0]][block[i][1]] = color;
-            // }
+            // net[block[i][0]][block[i][1]+dy] = color;
         }
         flag_net = false;
-        full_and_clear(get_highest_y(newshape),get_lowest_y(newshape));
+        // full_and_clear(get_highest_y(newshape),get_lowest_y(newshape));
     }
 }
 
@@ -564,16 +562,18 @@ function loop(){
     dy = 1;
 
     if(get_highest_y(newshape)==29||flag_net == false){   //移动到底则产生新的图形
-        numm = getRandomInt();
-        next_shape = get_newshape(numm);
-        next_color = color_blk[numm];
+        
+        full_and_clear(get_highest_y(newshape),get_lowest_y(newshape));
+        clear_block();
 
         num = numm;
         newshape = next_shape;
         color = next_color;
         turning = 0;
 
-        clear_block();
+        numm = getRandomInt();
+        next_shape = get_newshape(numm);
+        next_color = color_blk[numm];
 
         flag_net = true;
     }

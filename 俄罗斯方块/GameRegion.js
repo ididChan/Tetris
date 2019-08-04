@@ -76,60 +76,16 @@ function getRandomInt(){    //随机数生成器,range:0-6
 }
 
 function max_move_y(block, dy){   //返回dy条件下所能向下移动的最大值
-    var distance = 1;
-    var fflag = true;
-    for(distance;distance<=dy;distance++){
+    var sign = true;
+    for(var distance = 1; distance<=dy; distance++){
         for(i=0;i<4;i++){
             if(net[block[i][0]][block[i][1]+distance]!=0){
-                fflag = false;
+                sign = false;
             }
         }
-    }
-    if(fflag==false){
-        var max_x = get_highest_x(block);
-        var min_x = get_lowest_x(block);
-
-        var counter = 0;
-        var tag = true;
-
-        var min_y = 0;
-
-        var write_y = new Array();
-        for(i=0;i<4;i++){
-            write_y[i] = 0;
+        if(sign == false){
+            return (distance-1);
         }
-
-        var len_y = new Array();
-        for(i=0;i<4;i++){
-            len_y[i] = 0;
-        }
-
-        for(i=min_x;i<=max_x;i++){
-            for(j=0;j<30;j++){
-                if(net[i][j]==0&&tag==true){
-                    write_y[++counter] = j;
-                    tag = false;
-                }
-            }
-            tag = true;
-        }
-
-        for(i=0;i<4&&i>=min_x&&i<=max_x;i++){
-            len_y[i] = write_y[i]-block[i][1]-1;
-        }
-
-        for(i=0;i<4;i++){
-            if(len_y[i]!=null){
-                if(len_y[i]<min_y){
-                    min_y = len[i];
-                }
-            }
-        }
-
-        return min_y;
-    }
-    else{
-        return dy;
     }
 }//bug exists
 
@@ -198,41 +154,60 @@ function full_and_clear(high_y,low_y){    //行满消除
     }
 }
 
-function block_move(block,color,dy){   //图形移动
+function block_move(block,color,dy,dx){   //图形移动
     var x;
     var y;
     var flag = true;
-    //判断下一个位置是否有方块
+    var move;
 
+    //判断下一个位置是否有方块
     console.log("moving")
 
     for(i=0;i<4;i++){   //清空上一移动位的棋盘
         net[block[i][0]][block[i][1]] = 0;
     }
 
-    for(i=0;i<4;i++){
-        x = block[i][0];
-        y = block[i][1];
+    if(get_highest_x(block)+dx>29||get_lowest_x(block)+dx<0){
+        dx = 0;
+        dy = 1;
+    }
+    else{
+        for(i=0;i<4;i++){
+            x = block[i][0];
+            y = block[i][1];
 
-        if(net[x+dx][y+dy]!=0){
-            console.log("can not move")
-            flag = false;
+            if(net[x+dx][y+dy]!=0){
+                console.log("can not move")
+                flag = false;
+            }
         }
-    }
-    if(flag==true){   //没有方块则前进
-        for(i=0;i<4;i++){
-            block[i][0]+=dx;
-            block[i][1]+=dy;
-            net[block[i][0]][block[i][1]] = color;
+        if(flag==true){   //没有方块则前进
+            for(i=0;i<4;i++){
+                block[i][0]+=dx;
+                block[i][1]+=dy;
+                net[block[i][0]][block[i][1]] = color;
+            }
         }
-    }
-    else{    //有方块则对棋盘进行写入
-        for(i=0;i<4;i++){
-            net[block[i][0]][block[i][1]] = color;
-            // net[block[i][0]][block[i][1]+dy] = color;
+        else{    //有方块则对棋盘进行写入
+            if(dy==5&&dx==0){
+                move = max_move_y(block,dy);
+                for(i=0;i<4;i++){
+                    block[i][1]+=move;
+                    net[block[i][0]][block[i][1]] = color;
+                }
+            }
+            else if(dy==1&&dx==0){
+                for(i=0;i<4;i++){
+                    net[block[i][0]][block[i][1]] = color;
+                }
+            }
+            else{
+                dx = 0;
+                dy = 1;
+                block_move(block,color,dy,dx);
+            }
+            flag_net = false;
         }
-        flag_net = false;
-        // full_and_clear(get_highest_y(newshape),get_lowest_y(newshape));
     }
 }
 
@@ -546,7 +521,7 @@ function loop(){
     count = 0;
     gamergn.clearRect(0, 0, paint.width, paint.height);
     
-    block_move(newshape, color,dy);   //图形移动
+    block_move(newshape, color, dy, dx);   //图形移动
 
     //画图，每次刷新都对canvas重新绘制
     for(i=0;i<30;i++){

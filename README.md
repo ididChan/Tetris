@@ -1,8 +1,6 @@
 # Tetris   
 
 ### bug exists
-- 左右有块还要移动、初始位置旋转：gameover
-- 左右移越界时棋盘会清空
-- max_move_y最大距离的计算
+- 初始位置旋转：gameover
+- i_shape的右移
 - t_shape的旋转
-- 无法实现forcast
